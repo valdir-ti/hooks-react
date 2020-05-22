@@ -2,22 +2,27 @@ import React, { useState, useEffect } from 'react';
 
 export default function App() {
   const [ repositories, setRepositories ] = useState([]);
+  const [ location, setLocation ] = useState({});
 
   //Carrega as informações quando o componente é montado
-  useEffect(() => {    
+  useEffect(() => {
     async function fetchData(){
       const response = await fetch('https://api.github.com/users/valdir-ti/repos');    
       const data = await response.json();    
       setRepositories(data);
     }    
     fetchData();
+
+    //ComponentWillUnmount
+    const watchId = navigator.geolocation.watchPosition(handlePositionReceived);
+    return () =>navigator.geolocation.clearWatch(watchId);
+
   }, []);
 
-  //Só vai ser executado quando o parametro enviado for alterado
+  //Esse effect só vai ser executado quando o parametro enviado for alterado
   useEffect(()=>{
     const filtered = repositories.filter(repo => repo.favorite);
-
-    document.title = `Você tem ${filtered.length} favoritos`
+    document.title = `Você tem (${filtered.length}) favoritos`
   }, [repositories]);
 
   //Inserindo a informação de favorito
@@ -25,11 +30,18 @@ export default function App() {
     const newRepositories = repositories.map(repo => {
       return repo.id === id ? { ...repo, favorite: !repo.favorite } : repo;
     });
-
     setRepositories(newRepositories);
   }
 
+  //Trabalhando com o eventListener
+  function handlePositionReceived({ coords }){
+    console.log(coords);    
+    const { latitude, longitude } = coords;
+    setLocation({ latitude, longitude });
+  }
+
   return (
+    <>
       <ul>
         {repositories.map(repo => (
           <li key={repo.id}>
@@ -39,5 +51,10 @@ export default function App() {
           </li>
         ))}
       </ul>
+      <hr/>
+      <h3>Latitude e Longitude</h3>
+      <p>Latitude:&nbsp;{location.latitude}</p>
+      <p>Longitude:&nbsp;{location.longitude}</p>
+    </>
   );
 }
