@@ -1,29 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function App() {
-  const [ repositories, setRepositories ] = useState([
-    { id: 1, name: 'Repos teste'},
-    { id: 2, name: 'Repos 2 '},
-    { id: 3, name: 'Repos 3'} 
-  ]);
+  const [ repositories, setRepositories ] = useState([]);
 
-  function handleAddRepository(){
-    setRepositories([
-      ...repositories, 
-      { id: Math.random(), name: 'Novo Repo'} 
-    ]);
-  }
+  //Carrega as informações quando o componente é montado
+  useEffect(() => {    
+    async function fetchData(){
+      const response = await fetch('https://api.github.com/users/valdir-ti/repos');    
+      const data = await response.json();    
+      setRepositories(data);
+    }    
+    fetchData();
+  }, []);
 
   return (
-    <>      
       <ul>
         {repositories.map(repo => (
           <li key={repo.id}>{repo.name}</li>
         ))}
       </ul>
-      <button onClick={handleAddRepository}>
-        Adicionar repositório
-      </button>
-    </>
   );
 }
