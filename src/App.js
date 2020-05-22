@@ -13,6 +13,13 @@ export default function App() {
     fetchData();
   }, []);
 
+  //Só vai ser executado quando o parametro enviado for alterado
+  useEffect(()=>{
+    const filtered = repositories.filter(repo => repo.favorite);
+
+    document.title = `Você tem ${filtered.length} favoritos`
+  }, [repositories]);
+
   //Inserindo a informação de favorito
   function handleFavorite(id){
     const newRepositories = repositories.map(repo => {
